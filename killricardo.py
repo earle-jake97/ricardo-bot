@@ -19,30 +19,30 @@ KILL_COST = 8640
 RICARDO_ID = 233077250675703808
 
 # specify prefix
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = discord.Bot(command_prefix='!', intents=intents)
 
-# Custom Help Command
-class CustomHelpCommand(commands.HelpCommand):
-    def __init__(self):
-        super().__init__()
+# # Custom description Command
+# class CustomdescriptionCommand(commands.descriptionCommand):
+#     def __init__(self):
+#         super().__init__()
 
-    async def send_bot_help(self, mapping):
-        embed = discord.Embed(title="Bot Commands", color=discord.Color.blue())
-        for cog, commands in mapping.items():
-            filtered_commands = await self.filter_commands(commands, sort=True)
-            command_signatures = [self.get_command_signature(c) for c in filtered_commands if c.name != 'add']
-            if command_signatures:
-                embed.add_field(name=cog.qualified_name if cog else "No Category", value="\n".join(command_signatures), inline=False)
-        channel = self.get_destination()
-        await channel.send(embed=embed)
+#     async def send_bot_description(self, mapping):
+#         embed = discord.Embed(title="Bot Commands", color=discord.Color.blue())
+#         for cog, commands in mapping.items():
+#             filtered_commands = await self.filter_commands(commands, sort=True)
+#             command_signatures = [self.get_command_signature(c) for c in filtered_commands if c.name != 'add']
+#             if command_signatures:
+#                 embed.add_field(name=cog.qualified_name if cog else "No Category", value="\n".join(command_signatures), inline=False)
+#         channel = self.get_destination()
+#         await channel.respond(embed=embed)
 
-    async def send_command_help(self, command):
-        embed = discord.Embed(title=self.get_command_signature(command), description=command.help or "No help available", color=discord.Color.blue())
-        channel = self.get_destination()
-        await channel.send(embed=embed)
+#     async def send_command_description(self, command):
+#         embed = discord.Embed(title=self.get_command_signature(command), description=command.description or "No description available", color=discord.Color.blue())
+#         channel = self.get_destination()
+#         await channel.respond(embed=embed)
 
-# Set the custom help command
-bot.help_command = CustomHelpCommand()
+# # Set the custom description command
+# bot.description_command = CustomdescriptionCommand()
 
 # Function to get Ricardo's HP and death count
 def get_ricardo_stats():
@@ -113,58 +113,58 @@ async def add_currency_task():
         await asyncio.sleep(60)  # sleep for 60 seconds before adding vbucks again
 
 # check user's balance
-@bot.command(help="Check someone's balance. If no arguments supplied, check your own balance.")
+@bot.command(description="Check someone's balance. If no arguments supplied, check your own balance.")
 async def balance(ctx, member: discord.Member = None):
     user = member or ctx.author
     user_id = user.id
     balance = get_balance(user_id)
     if member:
-        await ctx.send(f'Their balance is {balance} Vbucks.')
+        await ctx.respond(f'Their balance is {balance} Vbucks.')
     else:
-        await ctx.send(f'Your balance is {balance} Vbucks.')
+        await ctx.respond(f'Your balance is {balance} Vbucks.')
 
-@bot.command(help="This is top secret")
-async def add(ctx, amount: int, ID):
+@bot.command(description="This is top secret")
+async def add(ctx, amount: int, id):
     if ctx.author.id == 165630744826347520:
-      update_balance(ID, amount)
-      balance = get_balance(ID)
-      await ctx.send(f'{amount} Vbucks have been added. Their new balance is {balance} Vbucks.')
+      update_balance(id, amount)
+      balance = get_balance(id)
+      await ctx.respond(f'{amount} Vbucks have been added. Their new balance is {balance} Vbucks.')
 
 # transfer vbuckks
-@bot.command(help="Transfer Vbucks to another user. Usage: !transfer recipient amount")
+@bot.command(description="Transfer Vbucks to another user. Usage: !transfer recipient amount")
 async def transfer(ctx, member: discord.Member, amount: int):
     if amount < 0:
-        await ctx.send("Fuck you Matt")
+        await ctx.respond("Fuck you Matt")
         return
     sender_id = ctx.author.id
     receiver_id = member.id
     sender_balance = get_balance(sender_id)
 
     if sender_balance < amount:
-        await ctx.send('You do not have enough Vbucks to complete this transfer.')
+        await ctx.respond('You do not have enough Vbucks to complete this transfer.')
         return
 
     update_balance(sender_id, -amount)
     update_balance(receiver_id, amount)
-    await ctx.send(f'{amount} Vbucks have been transferred to {member.mention}.')
+    await ctx.respond(f'{amount} Vbucks have been transferred to {member.mention}.')
 
-@bot.command(help="Shows Ricardo's death count")
+@bot.command(description="Shows Ricardo's death count")
 async def deaths(ctx):
     hp, death_count, initial_hp = get_ricardo_stats()
-    await ctx.send(f'Ricardo has been killed {death_count} times.')
+    await ctx.respond(f'Ricardo has been killed {death_count} times.')
 
 # KILL RICARDO
-@bot.command(help="KILL RICARDO")
+@bot.command(description="KILL RICARDO")
 async def kill(ctx, amount: int):
     user_id = ctx.author.id
     username = str(ctx.author)
     balance = get_balance(user_id)
 
     if balance < amount:
-        await ctx.send(f'You don\'t have enough Vbucks to attack Ricardo :( You only have {balance} Vbucks')
+        await ctx.respond(f'You don\'t have enough Vbucks to attack Ricardo :( You only have {balance} Vbucks')
         return
     if amount <= 0:
-        await ctx.send(f'Fuck you again Matt')
+        await ctx.respond(f'Fuck you again Matt')
         return
     
     hp, death_count, initial_hp = get_ricardo_stats()
@@ -175,10 +175,10 @@ async def kill(ctx, amount: int):
         new_initial_hp = int(initial_hp * 1.15)
         respawn_ricardo(new_initial_hp, death_count, new_initial_hp)
         num = randrange(0,len(LTG_CLIPS),1)
-        await ctx.send(f'KILL Ricardo! He has been killed {death_count} times. His new HP is {new_initial_hp}. {LTG_CLIPS[num]}')
+        await ctx.respond(f'KILL Ricardo! He has been killed {death_count} times. His new HP is {new_initial_hp}. {LTG_CLIPS[num]}')
     else:
         update_ricardo_hp(new_hp)
-        await ctx.send(f'You dealt {amount} damage to Ricardo. His remaining HP is {new_hp}.')
+        await ctx.respond(f'You dealt {amount} damage to Ricardo. His remaining HP is {new_hp}.')
 
     update_balance(user_id, -amount)
 
@@ -188,16 +188,17 @@ async def kill(ctx, amount: int):
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
-        await ctx.send('''This isn't a real command <:Weirdge:1250870748944404490> Type !help''')
+        await ctx.respond('''This isn't a real command <:Weirdge:1250870748944404490> Type !description''')
     elif isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send('Check your args <:Weirdge:1250870748944404490>')
+        await ctx.respond('Check your args <:Weirdge:1250870748944404490>')
     # else:
-    #     await ctx.send('Something went wrong with this command')
+    #     await ctx.respond('Something went wrong with this command')
 
 @bot.event
 async def on_message(message):
     if message.author == bot.user:
         return  
+    if message.author.bot: return
     
     user_id = message.author.id
     username = str(message.author)
@@ -216,15 +217,13 @@ async def on_message(message):
 
     conn.close()
 
-    await bot.process_commands(message)
-
-@bot.command(help="Shows Ricardo's HP")
+@bot.command(description="Shows Ricardo's HP")
 async def hp(ctx):
     hp, death_count, initial_hp = get_ricardo_stats()
-    await ctx.send(f'Ricardo: {hp}/{initial_hp}')
+    await ctx.respond(f'Ricardo: {hp}/{initial_hp}')
     
 # display top 10
-@bot.command(help="Shows the top ten highest balances")
+@bot.command(description="Shows the top ten highest balances")
 async def leaderboards(ctx):
     conn = sqlite3.connect('currency.db')
     c = conn.cursor()
@@ -236,7 +235,7 @@ async def leaderboards(ctx):
     conn.close()
 
     if not users:
-        await ctx.send('No users found in the database.')
+        await ctx.respond('No users found in the database.')
         return
     
     # display table
@@ -246,7 +245,7 @@ async def leaderboards(ctx):
         table_str += f'{user[1]:<14} | {user[2]}\n'
     table_str += '```'
 
-    await ctx.send(table_str)
+    await ctx.respond(table_str)
 
     
 @bot.event
