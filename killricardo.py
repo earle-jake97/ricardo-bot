@@ -44,6 +44,31 @@ class CustomHelpCommand(commands.HelpCommand):
 # Set the custom help command
 bot.help_command = CustomHelpCommand()
 
+# Function to get Ricardo's HP and death count
+def get_ricardo_stats():
+    conn = sqlite3.connect('currency.db')
+    c = conn.cursor()
+    c.execute('SELECT hp, death_count, initial_hp FROM ricardo_hp WHERE id = 1')
+    result = c.fetchone()
+    conn.close()
+    return result
+
+def update_ricardo_hp(new_hp):
+    conn = sqlite3.connect('currency.db')
+    c = conn.cursor()
+    c.execute('UPDATE ricardo_hp SET hp = ? WHERE id = 1', (new_hp,))
+    conn.commit()
+    conn.close()
+
+def respawn_ricardo(new_hp, death_count, initial_hp):
+    conn = sqlite3.connect('currency.db')
+    c = conn.cursor()
+    c.execute('UPDATE ricardo_hp SET hp = ?, death_count = ?, initial_hp = ? WHERE id = 1', (new_hp, death_count, initial_hp))
+    conn.commit()
+    conn.close()
+
+
+
 # get balance
 def get_balance(user_id):
     conn = sqlite3.connect('currency.db')
@@ -122,23 +147,38 @@ async def transfer(ctx, member: discord.Member, amount: int):
     update_balance(receiver_id, amount)
     await ctx.send(f'{amount} Vbucks have been transferred to {member.mention}.')
 
+@bot.command(help="Shows Ricardo's death count")
+async def deaths(ctx):
+    hp, death_count, initial_hp = get_ricardo_stats()
+    await ctx.send(f'Ricardo has been killed {death_count} times.')
+
 # KILL RICARDO
 @bot.command(help="KILL RICARDO")
-async def kill(ctx, target:str):
+async def kill(ctx, amount: int):
     user_id = ctx.author.id
+    username = str(ctx.author)
     balance = get_balance(user_id)
 
-    if target.lower() != 'ricardo':
-        await ctx.send(f'You can only kill Ricardo :)')
+    if balance < amount:
+        await ctx.send(f'You don\'t have enough Vbucks to attack Ricardo :( You only have {balance} Vbucks')
         return
-    elif target.lower() == 'ricardo' and balance >= KILL_COST:
-        ricardo_mention = f'<@{RICARDO_ID}>'
+    
+    hp, death_count, initial_hp = get_ricardo_stats()
+    new_hp = hp - amount
+
+    if new_hp <= 0:
+        death_count += 1
+        new_initial_hp = int(initial_hp * 1.15)
+        respawn_ricardo(new_initial_hp, death_count, new_initial_hp)
         num = randrange(0,len(LTG_CLIPS),1)
-        await ctx.send(f'KILL {ricardo_mention} {LTG_CLIPS[num]}')
-        
-        update_balance(user_id, -KILL_COST)
+        await ctx.send(f'KILL Ricardo! He has been killed {death_count} times. His new HP is {new_initial_hp}. {LTG_CLIPS[num]}')
     else:
-        await ctx.send(f'You don\'t have enough Vbucks to kill Ricardo :( You only have {balance} Vbucks')
+        update_ricardo_hp(new_hp)
+        await ctx.send(f'You dealt {amount} damage to Ricardo. His remaining HP is {new_hp}.')
+
+    update_balance(user_id, username, -amount)
+
+
 
 # Handle unknown commands
 @bot.event
@@ -147,8 +187,8 @@ async def on_command_error(ctx, error):
         await ctx.send('''This isn't a real command <:Weirdge:1250870748944404490> Type !help''')
     elif isinstance(error, commands.MissingRequiredArgument):
         await ctx.send('Check your args <:Weirdge:1250870748944404490>')
-    else:
-        await ctx.send('Something went wrong with this command')
+    # else:
+    #     await ctx.send('Something went wrong with this command')
 
 @bot.event
 async def on_message(message):
@@ -174,6 +214,11 @@ async def on_message(message):
 
     await bot.process_commands(message)
 
+@bot.command(help="Shows Ricardo's HP")
+async def hp(ctx):
+    hp, death_count, initial_hp = get_ricardo_stats()
+    await ctx.send(f'Ricardo: {hp}/{initial_hp}')
+    
 # display top 10
 @bot.command(help="Shows the top ten highest balances")
 async def leaderboards(ctx):
