@@ -162,6 +162,9 @@ async def kill(ctx, amount: int):
     if balance < amount:
         await ctx.send(f'You don\'t have enough Vbucks to attack Ricardo :( You only have {balance} Vbucks')
         return
+    if amount <= 0:
+        await ctx.send(f'Fuck you again Matt')
+        return
     
     hp, death_count, initial_hp = get_ricardo_stats()
     new_hp = hp - amount
@@ -176,7 +179,7 @@ async def kill(ctx, amount: int):
         update_ricardo_hp(new_hp)
         await ctx.send(f'You dealt {amount} damage to Ricardo. His remaining HP is {new_hp}.')
 
-    update_balance(user_id, username, -amount)
+    update_balance(user_id, -amount)
 
 
 
