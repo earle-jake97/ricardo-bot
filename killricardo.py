@@ -105,11 +105,12 @@ async def add_currency_task():
         users = c.fetchall()
 
         for user_id in users:
-            update_balance(user_id[0], 1)  # 1 vbuck to each user
+            num = randrange(12,25,1)
+            update_balance(user_id[0], num)  # 1 vbuck to each user
 
         conn.close()
 
-        await asyncio.sleep(5)  # sleep for 5 seconds before adding vbucks again
+        await asyncio.sleep(60)  # sleep for 60 seconds before adding vbucks again
 
 # check user's balance
 @bot.command(help="Check someone's balance. If no arguments supplied, check your own balance.")
