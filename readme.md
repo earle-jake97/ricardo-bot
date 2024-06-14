@@ -8,3 +8,11 @@
 
 ### Fixed
 - Fixed an issue where Ricardo could be overkilled and not refund you the remaining balance.
+
+# How to use
+### Create a new Discord Bot
+s
+### Perform setup
+Run database.py and ricardo.py to create the tables in your SQLite database.
+# Run the program
+Run killricardo.py to run the bot.
