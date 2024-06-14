@@ -21,29 +21,6 @@ RICARDO_ID = 233077250675703808
 # specify prefix
 bot = discord.Bot(command_prefix='!', intents=intents)
 
-# # Custom description Command
-# class CustomdescriptionCommand(commands.descriptionCommand):
-#     def __init__(self):
-#         super().__init__()
-
-#     async def send_bot_description(self, mapping):
-#         embed = discord.Embed(title="Bot Commands", color=discord.Color.blue())
-#         for cog, commands in mapping.items():
-#             filtered_commands = await self.filter_commands(commands, sort=True)
-#             command_signatures = [self.get_command_signature(c) for c in filtered_commands if c.name != 'add']
-#             if command_signatures:
-#                 embed.add_field(name=cog.qualified_name if cog else "No Category", value="\n".join(command_signatures), inline=False)
-#         channel = self.get_destination()
-#         await channel.respond(embed=embed)
-
-#     async def send_command_description(self, command):
-#         embed = discord.Embed(title=self.get_command_signature(command), description=command.description or "No description available", color=discord.Color.blue())
-#         channel = self.get_destination()
-#         await channel.respond(embed=embed)
-
-# # Set the custom description command
-# bot.description_command = CustomdescriptionCommand()
-
 # Function to get Ricardo's HP and death count
 def get_ricardo_stats():
     conn = sqlite3.connect('currency.db')
