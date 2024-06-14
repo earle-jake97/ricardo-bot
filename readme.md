@@ -14,5 +14,5 @@
 s
 ### Perform setup
 Run database.py and ricardo.py to create the tables in your SQLite database.
-# Run the program
+### Run the program
 Run killricardo.py to run the bot.
