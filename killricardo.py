@@ -2,7 +2,6 @@ from random import randrange
 import discord
 from discord.ext import commands
 import sqlite3
-import datetime
 import asyncio
 
 with open('token.txt', 'r') as file:
@@ -144,9 +143,20 @@ async def kill(ctx, amount: int):
         await ctx.respond(f'Fuck you again Matt')
         return
     hp, death_count, initial_hp = get_ricardo_stats()
+
+    ran = randrange(1,100,1)
+    if ran < 10:
+        crit = True
+        await ctx.respond(f'CRITICAL')
+        amount *= 1.5
+        amount = round(amount)
+    else: crit = False
+
     new_hp = hp - amount
 
     if new_hp <= 0:
+        if crit:
+            amount /= 1.5
         amount = min(hp, amount)
         death_count += 1
         new_initial_hp = int(initial_hp * 1.05)
