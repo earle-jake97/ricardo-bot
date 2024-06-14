@@ -129,34 +129,25 @@ async def deaths(ctx):
     hp, death_count, initial_hp = get_ricardo_stats()
     await ctx.respond(f'Ricardo has been killed {death_count} times.')
 
-# KILL RICARDO
+# TROLL RICARDO
 @bot.command(description="KILL RICARDO")
-async def kill(ctx, amount: int):
-    user_id = ctx.author.id
-    username = str(ctx.author)
-    balance = get_balance(user_id)
-
+async def heal(ctx, amount):
+    if isinstance(amount, str) and amount != "all":
+        return
+    if ctx.author.id != RICARDO_ID:
+        await ctx.respond(f'Only Ricardo can heal himself :(')
+        return
     if balance < amount:
-        await ctx.respond(f'You don\'t have enough Vbucks to attack Ricardo :( You only have {balance} Vbucks')
+        await ctx.respond(f'You don\'t have enough Vbucks to heal yourself :( You only have {balance} Vbucks')
         return
     if amount <= 0:
         await ctx.respond(f'Fuck you again Matt')
         return
     hp, death_count, initial_hp = get_ricardo_stats()
 
-    ran = randrange(1,100,1)
-    if ran < 10:
-        crit = True
-        await ctx.respond(f'CRITICAL')
-        amount *= 1.5
-        amount = round(amount)
-    else: crit = False
-
     new_hp = hp - amount
 
     if new_hp <= 0:
-        if crit:
-            amount /= 1.5
         amount = min(hp, amount)
         death_count += 1
         new_initial_hp = int(initial_hp * 1.05)
@@ -165,9 +156,60 @@ async def kill(ctx, amount: int):
         await ctx.respond(f'KILL Ricardo! He has been killed {death_count} times. His new HP is {new_initial_hp}. {LTG_CLIPS[num]}')
     else:
         update_ricardo_hp(new_hp)
+        await ctx.respond(f'SIKE YOU JUST TOOK {amount} DAMAGE RICARDO 😂😂😂😂😂😂')
+
+    update_balance(RICARDO_ID, -amount)
+
+# KILL RICARDO
+@bot.command(description="KILL RICARDO. Enter an integer value or 'all'")
+async def kill(ctx, amount: str):
+    user_id = ctx.author.id
+    balance = get_balance(user_id)
+    if amount.lower() == "all":
+        amount = balance
+    else:
+        try:
+            amount = int(amount)
+        except ValueError:
+            await ctx.respond(f'Invalid amount: {amount}. Please enter a valid number or "all".')
+            return
+
+    if balance < amount:
+        await ctx.respond(f'You don\'t have enough Vbucks to attack Ricardo :( You only have {balance} Vbucks')
+        return
+    
+    if amount <= 0:
+        await ctx.respond(f'Fuck you again Matt')
+        return
+
+    hp, death_count, initial_hp = get_ricardo_stats()
+
+    ran = randrange(1, 100, 1)
+    if ran < 10:
+        crit = True
+        await ctx.respond(f'CRITICAL')
+        amount = int(amount * 1.5)  # Ensure amount is an integer after multiplication
+    else:
+        crit = False
+
+    new_hp = hp - amount
+
+    if new_hp <= 0:
+        if crit:
+            amount = int(amount / 1.5)  # Convert back to original amount before crit multiplier
+        amount = min(hp, amount)
+        death_count += 1
+        new_initial_hp = int(initial_hp * 1.05)
+        respawn_ricardo(new_initial_hp, death_count, new_initial_hp)
+        num = randrange(0, len(LTG_CLIPS), 1)
+        ricardo_mention = f'<@{RICARDO_ID}>'
+        await ctx.respond(f'KILL {ricardo_mention}! He has been killed {death_count} times. His new HP is {new_initial_hp}. {LTG_CLIPS[num]}')
+    else:
+        update_ricardo_hp(new_hp)
         await ctx.respond(f'You dealt {amount} damage to Ricardo. His remaining HP is {new_hp}.')
 
     update_balance(user_id, -amount)
+
 
 
 
