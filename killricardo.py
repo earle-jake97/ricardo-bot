@@ -166,13 +166,13 @@ async def kill(ctx, amount: int):
     if amount <= 0:
         await ctx.respond(f'Fuck you again Matt')
         return
-    
     hp, death_count, initial_hp = get_ricardo_stats()
     new_hp = hp - amount
 
     if new_hp <= 0:
+        amount = min(hp, amount)
         death_count += 1
-        new_initial_hp = int(initial_hp * 1.15)
+        new_initial_hp = int(initial_hp * 1.05)
         respawn_ricardo(new_initial_hp, death_count, new_initial_hp)
         num = randrange(0,len(LTG_CLIPS),1)
         await ctx.respond(f'KILL Ricardo! He has been killed {death_count} times. His new HP is {new_initial_hp}. {LTG_CLIPS[num]}')
