@@ -240,8 +240,8 @@ async def heal(ctx, amount):
 # KILL RICARDO
 @bot.command(description="KILL RICARDO. Enter an integer value or 'all'")
 async def kill(ctx, amount: str):
-    user_id = ctx.author.id
-    balance = get_balance(user_id)
+    og_user_id = ctx.author.id
+    balance = get_balance(og_user_id)
     if amount.lower() == "all":
         amount = balance
     else:
@@ -277,7 +277,7 @@ async def kill(ctx, amount: str):
         amount = min(hp, amount)
         percentage = amount/initial_hp # Remove overkill amount from percent contribution
 
-        update_percentage(user_id, percentage)
+        update_percentage(og_user_id, percentage)
 
         death_count += 1
         new_initial_hp = int(initial_hp * 1.05)
@@ -297,10 +297,10 @@ async def kill(ctx, amount: str):
         
     else:
         update_ricardo_hp(new_hp)
-        update_percentage(user_id, percentage)
+        update_percentage(og_user_id, percentage)
         await ctx.respond(f'You dealt {amount} damage to Ricardo. His remaining HP is {new_hp}.')
 
-    update_balance(user_id, -amount)
+    update_balance(og_user_id, -amount)
 
 
 
@@ -350,7 +350,7 @@ async def leaderboards(ctx):
     c = conn.cursor()
     
     # display top 10 in descending order
-    c.execute('SELECT user_id, username, balance FROM users ORDER BY balance DESC LIMIT 10')
+    c.execute('SELECT user_id, username, balance, pp FROM users ORDER BY pp DESC LIMIT 15')
     users = c.fetchall()
     
     conn.close()
@@ -360,10 +360,10 @@ async def leaderboards(ctx):
         return
     
     # display table
-    table_str = '```Username       | Balance\n'
-    table_str += '--------------------------\n'
+    table_str = '```Username                     | Balance    | PP\n'
+    table_str += '------------------------------------------------\n'
     for user in users:
-        table_str += f'{user[1]:<14} | {user[2]}\n'
+        table_str += f'{user[1]:<28} | {user[2]:<10} | {user[3]}\n'
     table_str += '```'
 
     await ctx.respond(table_str)

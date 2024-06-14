@@ -1,10 +1,13 @@
 # Changelog
-## [1.0.2] - 2024-06-14
+## [1.0.3] - 2024-06-14
+### Added
+- Added Participation and Participation Points. Gain PP from contributing to Ricardo kills and add to your income based on your PP.
 ### Changed
-- You can now specify "all" to use your entire balance to kill Ricardo.
+- Income is now a static 18 + however many extra Vbucks you would earn from PP.
 
 ### Fixed
-- Killing Ricardo now properly mentions him.
+- Fixed ugly formatting on /leaderboards command
+- Last ID in database no longer loses Vbucks for someone else's kill.
 
 # How to use
 ### Create a new Discord Bot
