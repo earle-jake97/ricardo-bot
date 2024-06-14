@@ -1,4 +1,11 @@
 # Changelog
+## [1.0.2] - 2024-06-14
+### Changed
+- You can now specify "all" to use your entire balance to kill Ricardo.
+
+### Fixed
+- Killing Ricardo now properly mentions him.
+
 
 ## [1.0.1] - 2024-06-14
 ### Added
