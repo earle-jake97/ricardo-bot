@@ -13,8 +13,6 @@
 
 
 ## [1.0.0] - 2024-06-13
-### Added
-
 ### Changed
 - Ricardo HP growth per death has been nerfed from 15% -> 5%
 
