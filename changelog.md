@@ -1,4 +1,11 @@
 # Changelog
+## [1.0.4] - 2024-06-15
+### Changed
+- First iteration of refactoring code has been done.
+
+### Fixed
+-You no longer lose extra Vbucks for critting Ricardo.
+
 ## [1.0.3] - 2024-06-14
 ### Added
 - Added Participation and Participation Points. Gain PP from contributing to Ricardo kills and add to your income based on your PP.
