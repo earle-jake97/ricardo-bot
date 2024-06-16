@@ -4,7 +4,7 @@
 - First iteration of refactoring code has been done.
 
 ### Fixed
--You no longer lose extra Vbucks for critting Ricardo.
+- You no longer lose extra Vbucks for critting Ricardo.
 
 # How to use
 ### Create a new Discord Bot

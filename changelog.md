@@ -4,7 +4,7 @@
 - First iteration of refactoring code has been done.
 
 ### Fixed
--You no longer lose extra Vbucks for critting Ricardo.
+- You no longer lose extra Vbucks for critting Ricardo.
 
 ## [1.0.3] - 2024-06-14
 ### Added
