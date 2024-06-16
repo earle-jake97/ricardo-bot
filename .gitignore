@@ -1,3 +1,4 @@
 # .gitignore
 token.txt
 currency.db
+__pycache__

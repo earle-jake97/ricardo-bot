@@ -1,3 +1,6 @@
 {
-      "BOSS_ID": 233077250675703808
+      "BOSS_ID": 233077250675703808,
+      "BOSS_NAME": "Ricardo",
+      "BASE_INCOME": 18,
+      "PP_MULTIPLIER": 0.1
 }
