@@ -12,12 +12,8 @@ with open('config.json', 'r') as file:
 with open('token.txt', 'r') as file:
     TOKEN = file.read().rstrip()
 
-CLIPS =[]
 with open('clips.txt', 'r') as file:
-    content = file.read().split(',')
-    for link in content:
-        cleaned = link.strip().strip('""')
-        CLIPS.append(cleaned)
+    CLIPS = [link.strip().strip('""') for link in file.read().split(',')]
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -26,8 +22,13 @@ intents.typing = True
 intents.messages = True
 
 BOSS_ID = config.get('BOSS_ID', 0)
+BOSS_NAME = config.get('BOSS_NAME', "Fella")
 BASE_INCOME = config.get('BASE_INCOME', 18)
 PP_MULTIPLIER = config.get('PP_MULTIPLIER', 0.1)
+PAY_INTERVAL = config.get('PAY_INTERVAL', 60) # How often the bot distributes funds, in seconds
+BASE_CRIT_CHANCE = config.get('BASE_CRIT_CHANCE', 0.1)
+BASE_CRIT_DAMAGE = config.get('BASE_CRIT_DAMAGE', 1.5)
+
 
 
 class DatabaseHandler:
@@ -187,15 +188,29 @@ db_handler = DatabaseHandler()
 def calculate_income(pp: int):
     return (math.floor(pp * PP_MULTIPLIER)) + BASE_INCOME
 
+def calculate_damage(vbucks, critical_chance, critical_damage_modifier):
+    critical_chance = BASE_CRIT_CHANCE + critical_chance
+    damage = vbucks
+    ran = randrange(1, 100, 1)
+    if ran < critical_chance * 100:
+        # Ensure amount is an integer after multiplication
+        damage = int(vbucks * critical_damage_modifier)
+        isCrit = True
+    else: isCrit = False
+    return damage, isCrit
+
 # Adds currency to all registered users
-@tasks.loop(minutes=1)
 async def add_currency_task():
-    users = db_handler.fetch_all_users()
-    for user in users:
-        user_id = user[0]
-        pp = db_handler.get_pp(user_id)[0]
-        amount = calculate_income(pp)
-        db_handler.update_balance(user_id, amount)
+    await bot.wait_until_ready()
+    while not bot.is_closed():
+        users = db_handler.fetch_all_users()
+        for user in users:
+            user_id = user[0]
+            pp = db_handler.get_pp(user_id)[0]
+            amount = calculate_income(pp)
+            db_handler.update_balance(user_id, amount)
+    
+        await asyncio.sleep(PAY_INTERVAL)
 
 
 @bot.command(description="Check someone's balance. If no arguments supplied, check your own balance.")
@@ -241,16 +256,16 @@ async def pp(ctx, member: discord.Member = None):
 
 
 @bot.command(description="This is top secret")
-async def add(ctx, amount: int, id):
+async def add(ctx, amount: int, member: discord.Member):
     if ctx.author.id == 165630744826347520:
-        db_handler.update_balance(id, amount)
-        balance = db_handler.get_balance(id)[0]
+        user_id = member.id
+        db_handler.update_balance(user_id, amount)
+        balance = db_handler.get_balance(user_id)[0]
         await ctx.respond(f'{amount} Vbucks have been added. Their new balance is {balance} Vbucks.')
 
-# transfer vbuckks
 
 
-@bot.command(description="Transfer Vbucks to another user. Usage: !transfer recipient amount")
+@bot.command(description="Transfer Vbucks to another user.")
 async def transfer(ctx, member: discord.Member, amount: int):
     if amount < 0:
         await ctx.respond("Fuck you Matt")
@@ -271,12 +286,12 @@ async def transfer(ctx, member: discord.Member, amount: int):
 @bot.command(description="Shows Ricardo's death count")
 async def deaths(ctx):
     death_count = db_handler.get_ricardo_deaths()[0]
-    await ctx.respond(f'Ricardo has been killed {death_count} times.')
+    await ctx.respond(f'{BOSS_NAME} has been killed {death_count} times.')
 
 # KILL RICARDO
 
 
-@bot.command(description="KILL RICARDO. Enter an integer value or 'all'")
+@bot.command(description="KILL {BOSS_NAME}. Enter an integer value or 'all'")
 async def kill(ctx, amount: str):
     og_user_id = ctx.author.id
     balance = db_handler.get_balance(og_user_id)[0]
@@ -301,26 +316,21 @@ async def kill(ctx, amount: str):
     death_count = db_handler.get_ricardo_deaths()[0]
     max_hp = db_handler.get_ricardo_max_hp()[0]
 
-    # REWORK CRIT AND DAMAGE CALCULATION STUFF LATER
-    ran = randrange(1, 100, 1)
-    if ran < 10:
-        crit = True
-        await ctx.respond(f'CRITICAL')
-        # Ensure amount is an integer after multiplication
-        amount = int(amount * 1.5)
-    else:
-        crit = False
+    # change this to reflect on player stats later
+    calc = calculate_damage(amount, 0.0, 1.0)
+    damage_dealt = calc[0]
+    crit = calc[1]
 
-    new_hp = hp - amount
-    percentage = amount/max_hp
+    new_hp = hp - damage_dealt
+    percentage_contributed = amount/max_hp
     if new_hp <= 0:
         if crit:
             # Convert back to original amount before crit multiplier
-            amount = int(amount / 1.5)
+            amount = int(amount / BASE_CRIT_DAMAGE)
         amount = min(hp, amount)
-        percentage = amount/max_hp  # Remove overkill amount from percent contribution
+        percentage_contributed = amount/max_hp  # Remove overkill amount from percent contribution
 
-        db_handler.update_participation_percentage(og_user_id, percentage)
+        db_handler.update_participation_percentage(og_user_id, percentage_contributed)
 
         death_count += 1
         new_max_hp = int(max_hp * 1.05)
@@ -343,10 +353,10 @@ async def kill(ctx, amount: str):
 
     else:
         db_handler.update_ricardo_current_hp(new_hp)
-        db_handler.update_participation_percentage(og_user_id, percentage)
-        await ctx.respond(f'You dealt {amount} damage to Ricardo. His remaining HP is {new_hp}.')
+        db_handler.update_participation_percentage(og_user_id, percentage_contributed)
+        await ctx.respond(f'You dealt {amount} damage to {BOSS_NAME}. His remaining HP is {new_hp}.')
         if crit:
-            amount = int(amount / 1.5)
+            amount = int(amount / BASE_CRIT_CHANCE)
 
     db_handler.update_balance(og_user_id, -amount)
 
@@ -358,8 +368,8 @@ async def on_command_error(ctx, error):
         await ctx.respond('''This isn't a real command <:Weirdge:1250870748944404490> Type !description''')
     elif isinstance(error, commands.MissingRequiredArgument):
         await ctx.respond('Check your args <:Weirdge:1250870748944404490>')
-    # else:
-    #     await ctx.respond('Something went wrong with this command')
+    else:
+        await ctx.respond('Something went wrong with this command')
 
 
 @bot.event
@@ -391,7 +401,7 @@ async def on_message(message):
 @bot.command(description="Shows Ricardo's HP")
 async def hp(ctx):
     hp, max_hp = db_handler.get_ricardo_current_hp()[0], db_handler.get_ricardo_max_hp()[0]
-    await ctx.respond(f'Ricardo: {hp}/{max_hp}')
+    await ctx.respond(f'{BOSS_NAME}: {hp}/{max_hp}')
 
 # display top 10
 

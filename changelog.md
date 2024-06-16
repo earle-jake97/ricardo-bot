@@ -1,10 +1,12 @@
 # Changelog
+## [1.0.6] - 2024-06-15
+### Changed
+- More refactoring and config options added
+
 ## [1.0.5] - 2024-06-15
 ### Changed
 - More refactoring. Extra config options added.
 
-
-# Changelog
 ## [1.0.4] - 2024-06-15
 ### Changed
 - First iteration of refactoring code has been done.

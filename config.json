@@ -2,5 +2,8 @@
       "BOSS_ID": 233077250675703808,
       "BOSS_NAME": "Ricardo",
       "BASE_INCOME": 18,
-      "PP_MULTIPLIER": 0.1
+      "PP_MULTIPLIER": 0.1,
+      "PAY_INTERVAL": 60 ,
+      "BASE_CRIT_CHANCE": 0.1,
+      "BASE_CRIT_DAMAGE": 1.5
 }
