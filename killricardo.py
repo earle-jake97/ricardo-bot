@@ -12,14 +12,18 @@ with open('config.json', 'r') as file:
 with open('token.txt', 'r') as file:
     TOKEN = file.read().rstrip()
 
+CLIPS =[]
+with open('clips.txt', 'r') as file:
+    content = file.read().split(',')
+    for link in content:
+        cleaned = link.strip().strip('""')
+        CLIPS.append(cleaned)
+
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 intents.typing = True
 intents.messages = True
-
-LTG_CLIPS = ["https://cdn.discordapp.com/attachments/130154381717798912/1250678808768675850/ltg_kys_2.mp4?ex=666bd0e8&is=666a7f68&hm=559b873447a4eed5eead9d56631eaf07206333739889636b3048fb643209c774&",
-             "https://cdn.discordapp.com/attachments/130154381717798912/1250684405408595999/ltg_kys.mp4?ex=666bd61e&is=666a849e&hm=539b579e28402abfd078cc9996bc72b22e10a02b51fc2125616e37948165ffc3&", "https://cdn.discordapp.com/attachments/130154381717798912/1250684482441445469/ltg_180.mp4?ex=666bd631&is=666a84b1&hm=cefc3f71006de9ddab3a08243843fc9e1179eacb314474c42a116cf15fb31f03&"]
 
 BOSS_ID = config.get('BOSS_ID', 0)
 BASE_INCOME = config.get('BASE_INCOME', 18)
@@ -316,18 +320,18 @@ async def kill(ctx, amount: str):
         amount = min(hp, amount)
         percentage = amount/max_hp  # Remove overkill amount from percent contribution
 
-        db_handler.update_percentage(og_user_id, percentage)
+        db_handler.update_participation_percentage(og_user_id, percentage)
 
         death_count += 1
         new_max_hp = int(max_hp * 1.05)
         # Reset Ricardo's stats for new life
         db_handler.update_all_ricardo(new_max_hp, death_count, new_max_hp)
-        num = randrange(0, len(LTG_CLIPS), 1)
+        num = randrange(0, len(CLIPS), 1)
         ricardo_mention = f'<@{BOSS_ID}>'
         participants = db_handler.fetch_non_zero_participants()
 
         message = f'KILL {ricardo_mention}! He has been killed {
-            death_count} times. His new HP is {new_max_hp}. {LTG_CLIPS[num]}\n'
+            death_count} times. His new HP is {new_max_hp}. {CLIPS[num]}\n'
         for user_id, username, percentage in participants:  # Award PP to every user who contributed to the kill
             percentage *= 100
             pp_gain = round(percentage)
@@ -339,7 +343,7 @@ async def kill(ctx, amount: str):
 
     else:
         db_handler.update_ricardo_current_hp(new_hp)
-        db_handler.update_percentage(og_user_id, percentage)
+        db_handler.update_participation_percentage(og_user_id, percentage)
         await ctx.respond(f'You dealt {amount} damage to Ricardo. His remaining HP is {new_hp}.')
         if crit:
             amount = int(amount / 1.5)
