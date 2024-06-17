@@ -311,7 +311,7 @@ def calculate_income(pp: int):
 def calculate_damage(currency, player_id, boss_health):
     # Step 1: Calculate the base damage
     base_damage = currency
-    
+    crit = ""
     # Get the critical chance and damage modifier
     critical_chance = BASE_CRIT_CHANCE + db_handler.get_bonus_crit_rate(player_id)[0]
     critical_damage_modifier = BASE_CRIT_DAMAGE + db_handler.get_crit_damage_modifier(player_id)[0]
@@ -321,15 +321,16 @@ def calculate_damage(currency, player_id, boss_health):
         excess_base = base_damage - boss_health
         return base_damage, excess_base
     
-    ran = random.uniform(1, 1.2) # Damage can deal up to 1.2 times variable damage
+    ran = random.uniform(1, 1.1) # Damage can deal up to 10% more
     damage_range = base_damage * ran
     ran = random.randrange(1, 100, 1)
     if ran < critical_chance * 100:
-        actual_damage = int(damage_range * critical_damage_modifier)
+        actual_damage = round(damage_range * critical_damage_modifier)
+        crit = " critically💥"
     else:
-        actual_damage = int(damage_range)
+        actual_damage = round(damage_range)
 
-    return actual_damage, 0
+    return actual_damage, 0, crit
 
 
 def respawn_boss(boss_deaths, boss_max_hp):
@@ -376,7 +377,7 @@ async def add_currency_task():
 async def leaderboard(ctx):
     embed, max_pages = create_leaderboard_embed()
     view = LeaderboardView(ctx.author, 0, max_pages)
-    await ctx.respond(embed=embed, view=view)
+    await ctx.respond(embed=embed, view=view, ephemeral=True)
 
 @bot.command(description="Check someone's balance. If no arguments supplied, check your own balance.")
 async def balance(ctx, member: discord.Member = None):
@@ -472,9 +473,11 @@ async def attack(ctx, amount_spent: str):
     boss_max_hp = db_handler.get_boss_max_hp()[0]
     boss_death_count = db_handler.get_boss_deaths()[0]
     
-    damage_dealt, refund_amount = calculate_damage(amount_spent, attacker_id, boss_current_hp)
-    boss_current_hp -= damage_dealt
+    damage_dealt, refund_amount, crit = calculate_damage(amount_spent, attacker_id, boss_current_hp)
+    hurt_boss(attacker_id, damage_dealt, boss_max_hp, boss_current_hp)
 
+    boss_current_hp = db_handler.get_boss_current_hp()[0]
+    
     if boss_current_hp <= 0:
         damage_dealt -= boss_current_hp # ensures that players won't be granted extra total contribution
         respawn_boss(boss_death_count, boss_max_hp)
@@ -486,8 +489,7 @@ async def attack(ctx, amount_spent: str):
 
         await ctx.respond(f'{message}')
     else:
-        hurt_boss(attacker_id, damage_dealt, boss_max_hp, boss_current_hp)
-        await ctx.respond(f"{ctx.author.name} spent {amount_spent} {CURRENCY_NAME} to deal {damage_dealt} damage to {BOSS_NAME}.\n{BOSS_NAME}'s new HP: {boss_current_hp}/{boss_max_hp}")
+        await ctx.respond(f"{ctx.author.name} spent {amount_spent} {CURRENCY_NAME} to{crit} deal {damage_dealt} damage to {BOSS_NAME}.\n{BOSS_NAME}'s new HP: {boss_current_hp}/{boss_max_hp}")
     
     db_handler.update_balance(attacker_id, -amount_spent)
     db_handler.update_total_contribution(attacker_id, damage_dealt)

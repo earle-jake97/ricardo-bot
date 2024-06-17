@@ -1,4 +1,9 @@
 # Changelog
+## [1.1.1] - 2024-06-17
+### Changed
+- Leaderboard responses will only be shown to those who called it.
+- Critical hits are now more notable with an emoji💥
+
 ## [1.1.0] - 2024-06-17
 ### Added
 - Users now have a crit rate and crit damage modifier.
