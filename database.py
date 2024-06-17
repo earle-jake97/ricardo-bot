@@ -11,7 +11,10 @@ CREATE TABLE IF NOT EXISTS users (
     username TEXT,
     balance INTEGER NOT NULL DEFAULT 0,
     pp INTEGER NOT NULL DEFAULT 0,
-    participation_percentage FLOAT NOT NULL DEFAULT 0.0
+    participation_percentage FLOAT NOT NULL DEFAULT 0.0,
+    total_contribution INTEGER NOT NULL DEFAULT 0,
+    bonus_crit_rate FLOAT NOT NULL DEFAULT 0.0,
+    crit_damage_modifier FLOAT NOT NULL DEFAULT 0.0
 )
 ''')
 
@@ -41,6 +44,30 @@ try:
 except sqlite3.OperationalError as e:
     if 'duplicate column name' in str(e):
         print("Column 'participation_percentage' already exists.")
+    else:
+        raise
+
+try:
+    c.execute('ALTER TABLE users ADD COLUMN total_contribution INT NOT NULL DEFAULT 0.0')
+except sqlite3.OperationalError as e:
+    if 'duplicate column name' in str(e):
+        print("Column 'total_contribution' already exists.")
+    else:
+        raise
+
+try:
+    c.execute('ALTER TABLE users ADD COLUMN bonus_crit_rate FLOAT NOT NULL DEFAULT 0.0')
+except sqlite3.OperationalError as e:
+    if 'duplicate column name' in str(e):
+        print("Column 'bonus_crit_rate' already exists.")
+    else:
+        raise
+
+try:
+    c.execute('ALTER TABLE users ADD COLUMN crit_damage_modifier INT NOT NULL DEFAULT 0.0')
+except sqlite3.OperationalError as e:
+    if 'duplicate column name' in str(e):
+        print("Column 'crit_damage_modifier' already exists.")
     else:
         raise
 

@@ -1,10 +1,18 @@
-# Changelog
-## [1.0.4] - 2024-06-15
+# Changes [1.1.0] - 2024-06-17
+### Added
+- Users now have a crit rate and crit damage modifier.
+- /profile - you can now view your own or other user profiles and view their stats.
+
 ### Changed
-- First iteration of refactoring code has been done.
+- Changed how damage calculation works.
+- Added many more options to config.json
 
 ### Fixed
-- You no longer lose extra Vbucks for critting Ricardo.
+- Can no longer go negative when refunding crit vbucks
+- No more variable names in command descriptions
+
+### Planned 
+- Shop - will allow users to purchase items that aid their income and damage in some way.
 
 # How to use
 ### Create a new Discord Bot

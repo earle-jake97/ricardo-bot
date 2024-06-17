@@ -1,9 +1,11 @@
 {
       "BOSS_ID": 233077250675703808,
       "BOSS_NAME": "Ricardo",
+      "BOSS_HP_SCALING": 1.05,
+      "CURRENCY_NAME": "Vbucks",
       "BASE_INCOME": 18,
       "PP_MULTIPLIER": 0.1,
-      "PAY_INTERVAL": 60 ,
+      "PAY_INTERVAL": 60,
       "BASE_CRIT_CHANCE": 0.1,
       "BASE_CRIT_DAMAGE": 1.5
 }
