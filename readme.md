@@ -1,18 +1,7 @@
-# Changes [1.1.0] - 2024-06-17
-### Added
-- Users now have a crit rate and crit damage modifier.
-- /profile - you can now view your own or other user profiles and view their stats.
-
-### Changed
-- Changed how damage calculation works.
-- Added many more options to config.json
-
+# Changelog
+## [1.1.2] - 2024-06-17
 ### Fixed
-- Can no longer go negative when refunding crit vbucks
-- No more variable names in command descriptions
-
-### Planned 
-- Shop - will allow users to purchase items that aid their income and damage in some way.
+- Damage calculations should be accurate and will not give you a negative balance when overkilling the boss.
 
 # How to use
 ### Create a new Discord Bot

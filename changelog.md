@@ -1,4 +1,8 @@
 # Changelog
+## [1.1.2] - 2024-06-17
+### Fixed
+- Damage calculations should be accurate and will not give you a negative balance when overkilling the boss.
+
 ## [1.1.1] - 2024-06-17
 ### Changed
 - Leaderboard responses will only be shown to those who called it.

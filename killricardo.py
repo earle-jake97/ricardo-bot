@@ -319,7 +319,7 @@ def calculate_damage(currency, player_id, boss_health):
     # If the base damage would have killed, refund the excess currency spent
     if base_damage > boss_health:
         excess_base = base_damage - boss_health
-        return base_damage, excess_base
+        return base_damage, excess_base, crit
     
     ran = random.uniform(1, 1.1) # Damage can deal up to 10% more
     damage_range = base_damage * ran
@@ -328,7 +328,7 @@ def calculate_damage(currency, player_id, boss_health):
         actual_damage = round(damage_range * critical_damage_modifier)
         crit = " critically💥"
     else:
-        actual_damage = round(damage_range)
+        actual_damage = math.ceil(damage_range)
 
     return actual_damage, 0, crit
 
@@ -340,9 +340,15 @@ def respawn_boss(boss_deaths, boss_max_hp):
 
 # Hurts the boss and adds the damage dealt to the player's contribution
 def hurt_boss(attacker_id, damage_dealt, boss_max_hp, boss_current_hp):
-    percentage_contributed = damage_dealt/boss_max_hp
+    refund_amount = 0
+    if (boss_current_hp - damage_dealt) < 0:
+        refund_amount = abs(boss_current_hp - damage_dealt) # prevents gaining extra percent from overkilling the boss
 
     db_handler.update_boss_current_hp(boss_current_hp - damage_dealt)
+    if refund_amount > 0:
+        percentage_contributed = refund_amount/boss_max_hp
+    else:
+        percentage_contributed = damage_dealt/boss_max_hp
     db_handler.update_participation_percentage(attacker_id, percentage_contributed)
 
 # Rewards PP and returns a message showing all player awards
@@ -484,7 +490,7 @@ async def attack(ctx, amount_spent: str):
         amount_spent -= refund_amount
         new_boss_max_hp = db_handler.get_boss_max_hp()[0]
 
-        message = f'{BOSS_NAME} IS DEAD! {BOSS_NAME} has now died {boss_death_count} times. {BOSS_NAME} has respawned with {new_boss_max_hp}/{new_boss_max_hp}.\n'
+        message = f'{BOSS_NAME} IS DEAD! {BOSS_NAME} has now died {boss_death_count + 1} times. {BOSS_NAME} has respawned with {new_boss_max_hp}/{new_boss_max_hp}.\n'
         message += award_on_kill()
 
         await ctx.respond(f'{message}')
